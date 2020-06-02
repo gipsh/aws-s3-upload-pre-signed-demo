@@ -16,10 +16,6 @@ import (
         "github.com/aws/aws-sdk-go/service/s3"
 )
 
-// Response is of type APIGatewayProxyResponse since we're leveraging the
-// AWS Lambda Proxy Request functionality (default behavior)
-//
-// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
 type Response events.APIGatewayProxyResponse
 
 func TempFileName(prefix, suffix string) string {
@@ -64,13 +60,11 @@ func Handler(ctx context.Context) (Response, error) {
 	resp := Response{
 		StatusCode:      200,
 		IsBase64Encoded: false,
-//		Body:            buf.String(),
 		Body:		 string(body),
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin": "*",
 			"Access-Control-Allow-Headers": "*",
 			"Content-Type":           "application/json",
-			"X-MyCompany-Func-Reply": "world-handler",
 		},
 	}
 
