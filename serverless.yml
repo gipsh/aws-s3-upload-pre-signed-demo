@@ -1,0 +1,68 @@
+service: aws-upload-pre-signed-s3
+
+frameworkVersion: '>=1.28.0 <2.0.0'
+
+plugins:
+  - serverless-finch
+
+custom:
+  bucket: "aws-upload-pre-signed-bucket"
+  client:
+    bucketName: ${self:custom.bucket}
+
+provider:
+  name: aws
+  runtime: go1.x
+  environment:
+    UPLOAD_BUCKET: ${self:custom.bucket}
+  region: us-east-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:ListBucket
+        - s3:ListBucketVersions
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
+
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - 'https://*.amazonaws.com'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+              MaxAge: 0
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+              MaxAge: 00
+
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./bin/**
+
+functions:
+  purl:
+    handler: bin/purl
+    events:
+      - http:
+          path: purl
+          method: get
